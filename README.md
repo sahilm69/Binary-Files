@@ -1,21 +1,52 @@
 ```mermaid
 flowchart TD
-A[Developer Uploads New Firmware] --> B[Server Runs jdiff Algorithm]
-B --> C[Generate Patch File (Diff Between Old & New Firmware)]
-C --> D[Store Patch File & Metadata on Server]
-D --> E[Gateway Periodically Uploads Data to Server]
-E --> F{Server Response 200 OK}
-F -->|No Update| G[Continue Normal Operation]
-F -->|Update Available| H[Server Includes Update Flag in Response]
-H --> I[Gateway Detects Update Flag]
-I --> J[Gateway Switches to Bootloader Mode]
-J --> K[Bootloader Downloads Patch File from Server]
-K --> L[Read Current Firmware Image from Flash → Store to SD Card]
-L --> M[Apply Patch Using jdiff Algorithm]
-M --> N[Generate New Firmware Image File on SD Card]
-N --> O[Validate Patch Integrity (Checksum/CRC)]
-O --> P[Erase Flash Application Area]
-P --> Q[Write New Firmware Image from SD Card to Flash]
-Q --> R[Verify Firmware (Version/CRC)]
-R -->|Valid| S[Jump to Application]
-R -->|Invalid| T[Revert to Previous Firmware or Safe Mode]
+
+%% ========================
+%% SECTION 1: SERVER SIDE
+%% ========================
+
+A[Developer uploads new firmware] --> B[Server runs jdiff algorithm]
+B --> C[Generate patch file - difference between old and new firmware]
+C --> D[Store patch file and metadata on server]
+
+%% ========================
+%% SECTION 2: NORMAL OPERATION
+%% ========================
+
+D --> E[Gateway periodically uploads data to server]
+E --> F{Server response 200 OK?}
+
+F -->|No update| G[Continue normal operation]
+F -->|Update available| H[Server includes update flag in response]
+
+%% ========================
+%% SECTION 3: GATEWAY UPDATE
+%% ========================
+
+H --> I[Gateway detects update flag]
+I --> J[Gateway switches to bootloader mode]
+J --> K[Bootloader downloads patch file from server]
+
+%% ========================
+%% SECTION 4: PATCH APPLY
+%% ========================
+
+K --> L[Read current firmware image from flash and store to SD card]
+L --> M[Apply patch using jdiff algorithm]
+M --> N[Generate new firmware image file on SD card]
+N --> O[Validate patch integrity using checksum or CRC]
+
+%% ========================
+%% SECTION 5: FLASH UPDATE
+%% ========================
+
+O --> P[Erase flash application area]
+P --> Q[Write new firmware image from SD card to flash]
+Q --> R[Verify firmware version or CRC]
+
+%% ========================
+%% SECTION 6: POST-UPDATE
+%% ========================
+
+R -->|Valid| S[Jump to application]
+R -->|Invalid| T[Revert to previous firmware or safe mode]
